@@ -1,8 +1,9 @@
 const db = require('../config/connection');
 
 class Product {
-  getAll({ sort }) {
+  getAll({ category, sort }) {
     let orderBy = 'ORDER BY ';
+    let where = category ? `WHERE category_id = ${parseInt(category)}` : '';
 
     switch(sort) {
       case 'date':
@@ -23,6 +24,7 @@ class Product {
       COALESCE(AVG(reviews.rating), 0)::NUMERIC(2,1) AS rating 
       FROM products
       LEFT JOIN reviews ON products.id = reviews.product_id
+      ${where}
       GROUP BY (products.id) ${orderBy}`;
 
     return db.query(query);
@@ -39,25 +41,58 @@ class Product {
     return db.query(query, [ id ]);
   }
 
-  create({ name, description, price, stock }) {
+  // create({ name, description, price, stock }) {
+    // return db.query(
+      // `INSERT INTO products (name, description, price, stock) 
+      // VALUES ($1, $2, $3, $4) RETURNING *, 0 AS rating`, 
+      // [ name, description, price, stock ]
+    // );
+  // }
+
+  // update({ name, description, price, stock, id }) {
+    // return db.query(
+      // `UPDATE products SET name = $1, description = $2, price = $3,
+      // stock = $4 WHERE id = $5`, 
+      // [ name, description, price, stock, id ]
+    // );
+  // }
+
+
+  // update create() & update() methods to corrolate with our V2 documentation
+  create({ name, description, price, quantity, category_id }) {
     return db.query(
-      `INSERT INTO products (name, description, price, stock) 
-      VALUES ($1, $2, $3, $4) RETURNING *, 0 AS rating`, 
-      [ name, description, price, stock ]
+      `INSERT INTO products (name, description, price, quantity, category_id) 
+      VALUES ($1, $2, $3, $4, $5) RETURNING *, 0 AS rating`, 
+      [ name, description, price, quantity, category_id ]
+    );
+  }
+  
+  update({ name, description, price, quantity, category_id, id }) {
+    return db.query(
+      `UPDATE products SET name = $1, description = $2, price = $3,
+      quantity = $4, category_id = $5 WHERE id = $6`, 
+      [ name, description, price, quantity, category_id, id ]
     );
   }
 
-  update({ name, description, price, stock, id }) {
-    return db.query(
-      `UPDATE products SET name = $1, description = $2, price = $3,
-      stock = $4 WHERE id = $5`, 
-      [ name, description, price, stock, id ]
+
+
+
+  updateQuantity({ quantity, id }) {
+    return db.query('UPDATE products SET quantity = $1 WHERE id = $2', 
+      [ quantity, id ]
     );
   }
+
+
+
 
   delete({ id }) {
     return db.query('DELETE FROM products WHERE id = $1', [ id ]);
   }
+
+
+  
 }
 
 module.exports = new Product();
