@@ -33,6 +33,13 @@
                     "rating"
                   ]
                 }
+              },
+              {   
+                "in": "query",
+                "name": "pagie",
+                "schema": {
+                  "type": "integer"
+                }
               }
             ],           
             "responses": {
@@ -182,6 +189,13 @@
                   "in": "path",
                   "name": "product_id",
                   "required": true,
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                {
+                  "in": "query",
+                  "name": "page",
                   "schema": {
                     "type": "integer"
                   }
