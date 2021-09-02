@@ -1,10 +1,50 @@
 const db = require('../config/connection');
 
+
+
 class Product {
-  getAll({ category, sort }) {
+
+  constructor(){
+    this.offset = 10;
+  }
+
+
+  // getAll({ category, sort }) {
+    // let orderBy = 'ORDER BY ';
+    // let where = category ? `WHERE category_id = ${parseInt(category)}` : '';
+// 
+    // switch(sort) {
+      // case 'date':
+        // orderBy += 'product_date DESC';
+        // break;
+      // case 'price':
+        // orderBy += 'price';
+        // break;
+      // case 'rating':
+        // orderBy += 'rating DESC';
+        // break;
+      // default:
+        // orderBy += 'id';
+        // break;
+    // }
+// 
+    // const query = `SELECT products.*,
+      // COALESCE(AVG(reviews.rating), 0)::NUMERIC(2,1) AS rating 
+      // FROM products
+      // LEFT JOIN reviews ON products.id = reviews.product_id
+      // ${where}
+      // GROUP BY (products.id) ${orderBy}`;
+// 
+    // return db.query(query);
+  // }
+  getAll({ category, sort, page }) {
     let orderBy = 'ORDER BY ';
     let where = category ? `WHERE category_id = ${parseInt(category)}` : '';
-
+  
+    let offset = page
+      ? `OFFSET ${this.offset * page - this.offset} LIMIT ${this.offset + 1}` 
+      : '';
+  
     switch(sort) {
       case 'date':
         orderBy += 'product_date DESC';
@@ -18,17 +58,22 @@ class Product {
       default:
         orderBy += 'id';
         break;
-    }
-
+    }  
     const query = `SELECT products.*,
       COALESCE(AVG(reviews.rating), 0)::NUMERIC(2,1) AS rating 
       FROM products
-      LEFT JOIN reviews ON products.id = reviews.product_id
+      LEFT JOIN reviews ON products.id = reviews.product_id 
       ${where}
-      GROUP BY (products.id) ${orderBy}`;
-
+      GROUP BY (products.id) ${orderBy} ${offset}`;
+  
     return db.query(query);
   }
+
+
+
+
+
+
 
   getOne({ id }) {
     const query = `SELECT products.*, 

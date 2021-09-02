@@ -1,9 +1,41 @@
 const db = require('../config/connection');
 
 class Review {
-  getAll({ product_id, sort }) {
-    let orderBy = 'ORDER BY ';
 
+  constructor(){
+    this.offset = 10;
+  }
+
+
+
+  // getAll({ product_id, sort }) {
+    // let orderBy = 'ORDER BY ';
+// 
+    // switch(sort) {
+      // case 'date':
+        // orderBy += 'review_date DESC';
+        // break;
+      // case 'votes':
+        // orderBy += 'helpful_votes DESC';
+        // break;
+      // case 'rating':
+        // orderBy += 'rating DESC';
+        // break;
+      // default:
+        // orderBy += 'id';
+        // break;
+    // }
+// 
+    // const query = `SELECT * FROM reviews WHERE product_id = $1 ${orderBy}`;
+// 
+    // return db.query(query, [ product_id ]);
+  // }
+  getAll({ product_id, sort, page }) {
+    let orderBy = 'ORDER BY ';
+    let offset = page
+      ? `OFFSET ${this.offset * page - this.offset} LIMIT ${this.offset + 1}` 
+      : '';
+  
     switch(sort) {
       case 'date':
         orderBy += 'review_date DESC';
@@ -18,11 +50,34 @@ class Review {
         orderBy += 'id';
         break;
     }
-
-    const query = `SELECT * FROM reviews WHERE product_id = $1 ${orderBy}`;
-
+  
+    const query = `SELECT * FROM reviews WHERE product_id = $1 ${orderBy} ${offset}`;
+  
     return db.query(query, [ product_id ]);
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   getOne({ id }) {
     return db.query('SELECT * FROM reviews WHERE id = $1', [ id ]);
@@ -54,7 +109,7 @@ class Review {
   }
 
 
-  
+
   delete({ id }) {
     return db.query('DELETE FROM reviews WHERE id = $1', [ id ]);
   }
