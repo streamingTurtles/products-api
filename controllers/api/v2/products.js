@@ -2,6 +2,7 @@ const router = require('express').Router();
 // added another ../ to make sure the path to models is found since it was moved from api/products.js into newly created folder v2
 // also needed to update the models path for v1
 const { Product, Review } = require('../../../models');
+const redis = require('../../../config/redis');
 
 
 
@@ -47,7 +48,8 @@ router.get('/', async (req, res) => {
       url.searchParams.set('page', page + 1);
       link += `<${url.href}>; rel="next"`;
     }
-  
+    // add this line before res.set().json() - this sets up key/value pair for caching to Redis
+    await redis.set(req.originalUrl, JSON.stringify(rows), 'EX', 300);
     res.set('Link', link).status(200).json(rows);
   }
   catch (err) {
@@ -166,7 +168,8 @@ router.get('/:id/reviews', async (req, res) => {
       url.searchParams.set('page', page + 1);
       link += `<${url.href}>; rel="next"`;
     }
-
+    // add this line before res.set().json() - this sets up key/value pair for caching to Redis
+    await redis.set(req.originalUrl, JSON.stringify(rows), 'EX', 300);
     res.set('Link', link).status(200).json(rows);
   }
   catch (err) {
