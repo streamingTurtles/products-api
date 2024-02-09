@@ -44,6 +44,17 @@ class Review {
     );
   }
 
+
+  
+  updateVotes({ id, helpful_votes }) {
+    return db.query(
+      `UPDATE reviews SET helpful_votes = $1 WHERE id = $2`, 
+      [ helpful_votes, id ]
+    );
+  }
+
+
+
   delete({ id }) {
     return db.query('DELETE FROM reviews WHERE id = $1', [ id ]);
   }

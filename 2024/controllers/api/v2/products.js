@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Product, Review } = require('../../models');
+const { Product, Review } = require('../../../models');
 
 router.get('/', async (req, res) => {
   try {
@@ -103,30 +103,17 @@ router.post('/:id/reviews', async (req, res) => {
   }
 });
 
-router.get('/:product_id/reviews/:review_id', async (req, res) => {
-  try {
-    const { rows, rowCount } = await Review.getOne({
-      id: req.params.review_id
-    });
 
-    if (rowCount > 0) {
-      res.status(200).json(rows[0]);
-    }
-    else {
-      res.status(404).end();
-    }
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).end();
-  }
-});
 
-router.put('/:product_id/reviews/:review_id', async (req, res) => {
+
+
+
+
+router.patch('/:id', async (req, res) => {
   try {
-    const { rowCount } = await Review.update({ 
-      id: req.params.review_id,
-      ...req.body 
+    const { rowCount } = await Product.updateQuantity({ 
+      id: req.params.id,
+      quantity: req.body.quantity
     });
 
     res.status(rowCount === 0 ? 404 : 204).end();
@@ -134,20 +121,6 @@ router.put('/:product_id/reviews/:review_id', async (req, res) => {
   catch (err) {
     console.error(err);
     res.status(err.table ? 400 : 500).end();
-  }
-});
-
-router.delete('/:product_id/reviews/:review_id', async (req, res) => {
-  try {
-    const { rowCount } = await Review.delete({
-      id: req.params.review_id
-    });
-
-    res.status(rowCount === 0 ? 404 : 204).end();
-  }
-  catch (err) {
-    console.error(err);
-    res.status(500).end();
   }
 });
 
