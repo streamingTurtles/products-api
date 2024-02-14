@@ -8,6 +8,23 @@
 
 const router = require('express').Router();
 
+router.use((req, res, next) => {
+
+    // this will cache all requests for 10,000 seconds, get and unecessarly post requests
+    // we use if statment below to only cache get requests
+    //res.set('Cache-Control', 'private, max-age=10000');
+
+    if (req.method === 'GET') {
+        res.set('Cache-Control', 'private, max-age=300');
+      } 
+  
+    next();
+  });
+
+
+
+
+
 const v1Routes = require('./v1');
 const v2Routes = require('./v2');
 
