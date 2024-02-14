@@ -1,13 +1,13 @@
 {
     "openapi": "3.0.0",
     "info": {
-      "title": "Products API",
+      "title": "Products API version 1",
       "description": "Manage products and reviews",
       "version": "1.0.0"
     },
     "servers": [
       {
-        "url": "/api"
+        "url": "/api/v1"
       }
     ],
     "paths": {

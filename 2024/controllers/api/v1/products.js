@@ -1,9 +1,18 @@
 const router = require('express').Router();
-const { Product, Review } = require('../../models');
+const { Product, Review } = require('../../../models');
+
+
 
 router.get('/', async (req, res) => {
   try {
     const { rows } = await Product.getAll(req.query);
+
+    const stockedRows = rows.map((row) =>{
+      return {
+        ...row,
+        stock: row.quantity
+      } 
+    });
 
     res.status(200).json(rows);
   }
@@ -15,7 +24,10 @@ router.get('/', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { rows } = await Product.create(req.body);
+    const { rows } = await Product.create({
+      ...req.body,
+      quantity: req.body.stock
+    });
 
     res.status(200).json(rows[0]);
   }
@@ -32,7 +44,12 @@ router.get('/:id', async (req, res) => {
     });
 
     if (rowCount > 0) {
-      res.status(200).json(rows[0]);
+      //res.status(200).json(rows[0]);
+      const row = {
+        ...rows[0],
+        stock: rows[0].quantity
+      }
+      res.status(200).json(row);
     }
     else {
       res.status(404).end();
@@ -48,7 +65,8 @@ router.put('/:id', async (req, res) => {
   try {
     const { rowCount } = await Product.update({ 
       id: req.params.id,
-      ...req.body
+      ...req.body,
+      quantity: req.body.stock
     });
 
     res.status(rowCount === 0 ? 404 : 204).end();
