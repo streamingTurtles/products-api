@@ -1,57 +1,17 @@
 const router = require('express').Router();
-const { Product, Review } = require('../../../models');
-const redis = require('../../../config/redis');
-
-
-
+const { Product, Review } = require('../../models');
 
 router.get('/', async (req, res) => {
-
-  const page = parseInt(req.query.page) || 1;
-
-  const url = new URL(req.originalUrl, `${req.protocol}://${req.get('host')}`);
-  let link = '';
-
-
   try {
-    const { rows } = await Product.getAll({
-      ...req.query,
-      page
-      //res.status(200).json(rows);
-    });
+    const { rows } = await Product.getAll(req.query);
 
-    if (rows.length > 0 && page > 1) {
-    url.searchParams.set('page', page - 1);
-    link += `<${url.href}>; rel="prev"`;
-    }
-
-    if (rows.length > Product.offset) {
-    if (link != '') {
-      link +=', ';
-    }
-
-    rows.pop();
-
-    url.searchParams.set('page', page + 1);
-    link += `<${url.href}>; rel="next"`;
-    }
-
-  
-
-  await redis.set(req.originalUrl, JSON.stringify(rows), 'EX', 300);  
-  res.set('Link', link).status(200).json(rows);
-  }  
-  
-
+    res.status(200).json(rows);
+  }
   catch (err) {
     console.error(err);
     res.status(500).end();
   }
 });
-
-
-
-
 
 router.post('/', async (req, res) => {
   try {
@@ -113,38 +73,14 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-
-
 router.get('/:id/reviews', async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const url = new URL(req.originalUrl, `${req.protocol}://${req.get('host')}`);
-  let link = '';
-
   try {
     const { rows } = await Review.getAll({
       product_id: req.params.id,
-      ...req.query,
-      page
+      ...req.query
     });
 
-    if (rows.length > 0 && page > 1) {
-      url.searchParams.set('page', page - 1);
-      link += `<${url.href}>; rel="prev"`;
-    }
-
-    if (rows.length > Review.offset) {
-      if (link != '') {
-        link +=', ';
-      }
-
-      rows.pop();
-      url.searchParams.set('page', page + 1);
-      link += `<${url.href}>; rel="next"`;
-    }
-
-    
-    await redis.set(req.originalUrl, JSON.stringify(rows), 'EX', 300);
-    res.set('Link', link).status(200).json(rows);
+    res.status(200).json(rows);
   }
   catch (err) {
     console.error(err);
@@ -167,17 +103,30 @@ router.post('/:id/reviews', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-router.patch('/:id', async (req, res) => {
+router.get('/:product_id/reviews/:review_id', async (req, res) => {
   try {
-    const { rowCount } = await Product.updateQuantity({ 
-      id: req.params.id,
-      quantity: req.body.quantity
+    const { rows, rowCount } = await Review.getOne({
+      id: req.params.review_id
+    });
+
+    if (rowCount > 0) {
+      res.status(200).json(rows[0]);
+    }
+    else {
+      res.status(404).end();
+    }
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).end();
+  }
+});
+
+router.put('/:product_id/reviews/:review_id', async (req, res) => {
+  try {
+    const { rowCount } = await Review.update({ 
+      id: req.params.review_id,
+      ...req.body 
     });
 
     res.status(rowCount === 0 ? 404 : 204).end();
@@ -185,6 +134,20 @@ router.patch('/:id', async (req, res) => {
   catch (err) {
     console.error(err);
     res.status(err.table ? 400 : 500).end();
+  }
+});
+
+router.delete('/:product_id/reviews/:review_id', async (req, res) => {
+  try {
+    const { rowCount } = await Review.delete({
+      id: req.params.review_id
+    });
+
+    res.status(rowCount === 0 ? 404 : 204).end();
+  }
+  catch (err) {
+    console.error(err);
+    res.status(500).end();
   }
 });
 
