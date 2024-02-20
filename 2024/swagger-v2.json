@@ -249,6 +249,13 @@
                       "rating"
                     ]
                   }
+                },
+                {
+                  "in": "query",
+                  "name": "page",
+                  "schema": {
+                    "type": "integer"
+                  }
                 }
               ],
 
@@ -393,6 +400,13 @@
                   "in": "path",
                   "name": "product_id",
                   "required": true,
+                  "schema": {
+                    "type": "integer"
+                  }
+                },
+                {
+                  "in": "query",
+                  "name": "page",
                   "schema": {
                     "type": "integer"
                   }
