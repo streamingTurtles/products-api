@@ -1,11 +1,14 @@
 const router = require('express').Router();
 const { Category } = require('../../../models');
+const redis = require('../../../config/redis');
 
 
 
 router.get('/', async (req, res) => {
     try {
       const { rows } = await Category.getAll();
+
+      await redis.set(req.originalUrl, JSON.stringify(rows), 'EX', 3600);
   
       res.status(200).json(rows);
     }

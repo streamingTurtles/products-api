@@ -1,81 +1,157 @@
 {
-    "openapi": "3.0.0",
-    "info": {
-      "title": "Products API version 2",
-      "description": "Manage products, categories, and reviews",
-      "version": "2.0.0"
-    },
-    "servers": [
-      {
-        "url": "/api/v2"
-      }
-    ],
-
-    "paths": {
-
-      "/reviews/{review_id}": {
-        "parameters": [
-          {
-            "in": "path",
-            "name": "review_id",
-            "required": true,
-            "schema": {
-              "type": "integer"
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Products API",
+    "description": "Manage products, categories and reviews",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "/api/v2"
+    }
+  ],
+  "paths": {
+      "/products": {
+        "get": { 
+          "tags": ["products"],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "category",
+              "schema": {
+                "type": "integer"
+              }
+            },
+            {
+              "in": "query",
+              "name": "sort",
+              "schema": {
+                "type": "string",
+                "enum": [
+                  "date",
+                  "price",
+                  "rating"
+                ]
+              }
+            },
+            {   
+              "in": "query",
+              "name": "pagie",
+              "schema": {
+                "type": "integer"
+              }
             }
-          }
-        ],
-        "get": {
-          "tags": ["reviews"],
+          ],           
           "responses": {
-            "200": {
-              "description": "OK",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Review"
+              "200": {
+                "description": "OK",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Product"
+                      }
+                    }
                   }
                 }
               }
-            },
-            "404": {
-              "description": "Not found"
-            }
-          }      
+            }      
         },
-        "put": {
-          "tags": ["reviews"],
+        "post": {
+          "tags": ["products"],
           "requestBody": {
-            "content": {
-              "application/json": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              },
+              "required": true
+            },
+          "responses": {
+              "200": {
+                "description": "OK",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              },
+              "400": {
+                "description": "Invalid input"
+              }
+            }      
+        }
+      },
+    
+      "/products/{product_id}": {
+          "parameters": [
+              {
+                "in": "path",
+                "name": "product_id",
+                "required": true,
                 "schema": {
-                  "$ref": "#/components/schemas/Review"
+                  "type": "integer"
                 }
               }
-            },
-            "required": true
-          },
+            ],
+        "get": {
+          "tags": ["products"],
           "responses": {
-            "204": {
-              "description": "Updated successfully"
-            },
-            "400": {
-              "description": "Invalid input"
-            },
-            "404": {
-              "description": "Not found"
+              "200": {
+                "description": "OK",
+                "content": {
+                  "application/json": {
+                    "schema": {
+                      "$ref": "#/components/schemas/Product"
+                    }
+                  }
+                }
+              },
+              "404": {
+                "description": "Not found"
+              }
             }
-          }      
+    
+        },
+        "put": {
+          "tags": ["products"],
+          "requestBody": {
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              },
+              "required": true
+            },
+            "responses": {
+              "204": {
+                "description": "Updated successfully"
+              },
+              "400": {
+                "description": "Invalid input"
+              },
+              "404": {
+                "description": "Not found"
+              }
+            }                    
         },
         "patch": {
-          "tags": ["reviews"],
+          "tags": ["products"],
           "requestBody": {
             "content": {
               "application/json": {
                 "schema": {
                   "properties": {
-                    "helpful_votes": {
+                    "quantity": {
                       "type": "integer",
-                      "example": 1
+                      "example": 2
                     }
                   }
                 }
@@ -93,23 +169,174 @@
             "404": {
               "description": "Not found"
             }
-          }      
+          }
         },
         "delete": {
-          "tags": ["reviews"],
+          "tags": ["products"],
           "responses": {
-            "204": {
-              "description": "Deleted successfully"
-            },
-            "404": {
-              "description": "Not found"
-            }
-          }      
+              "204": {
+                "description": "Deleted successfully"
+              },
+              "404": {
+                "description": "Not found"
+              }
+            }      
         }
       },
-
+      "/products/{product_id}/reviews": {
+          "parameters": [
+              {
+                "in": "path",
+                "name": "product_id",
+                "required": true,
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              {
+                "in": "query",
+                "name": "page",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            ],
+          "get": {
+              "tags": ["products", "reviews"],
+              "parameters": [
+                  {
+                    "in": "query",
+                    "name": "sort",
+                    "schema": {
+                      "type": "string",
+                      "enum": [
+                        "date",
+                        "votes",
+                        "rating"
+                      ]
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Review"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "404": {
+                    "description": "Not found"
+                  }
+                }          
+          },
+          "post": {
+              "tags": ["products", "reviews"],
+              "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  },
+                  "required": true
+                },
+                "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Review"
+                        }
+                      }
+                    }
+                  },
+                  "400": {
+                    "description": "Invalid input"
+                  }
+                }          
+          }
+        },
+        "/products/{product_id}/reviews/{review_id}": {
+          "parameters": [
+              {
+                "in": "path",
+                "name": "product_id",
+                "required": true,
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              {
+                "in": "path",
+                "name": "review_id",
+                "required": true,
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            ],
+          "get": {
+              "responses": {
+                  "200": {
+                    "description": "OK",
+                    "content": {
+                      "application/json": {
+                        "schema": {
+                          "$ref": "#/components/schemas/Review"
+                        }
+                      }
+                    }
+                  },
+                  "404": {
+                    "description": "Not found"
+                  }
+                }          
+          },
+          "put": {
+              "requestBody": {
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  },
+                  "required": true
+                },
+                "responses": {
+                  "204": {
+                    "description": "Updated successfully"
+                  },
+                  "400": {
+                    "description": "Invalid input"
+                  },
+                  "404": {
+                    "description": "Not found"
+                  }
+                }          
+          },
+          "delete": {
+              "responses": {
+                  "204": {
+                    "description": "Deleted successfully"
+                  },
+                  "404": {
+                    "description": "Not found"
+                  }
+                }          
+          }
+        },
         "/categories": {
-          "get": { 
+          "get": {
             "tags": ["categories"],
             "responses": {
               "200": {
@@ -125,7 +352,7 @@
                   }
                 }
               }
-            }        
+            }          
           },
           "post": {
             "tags": ["categories"],
@@ -153,11 +380,10 @@
                 "400": {
                 "description": "Invalid input"
                 }
-            }        
+            }          
           }
         },
         "/categories/{category_id}": {
-          
           "parameters": [
             {
               "in": "path",
@@ -168,7 +394,6 @@
               }
             }
           ],
-
           "get": {
             "tags": ["categories"],
             "responses": {
@@ -185,9 +410,8 @@
               "404": {
                 "description": "Not found"
               }
-            }        
+            }          
           },
-
           "put": {
             "tags": ["categories"],
             "requestBody": {
@@ -210,9 +434,8 @@
               "404": {
                 "description": "Not found"
               }
-            }
+            }          
           },
-
           "delete": {
             "tags": ["categories"],
             "responses": {
@@ -222,430 +445,207 @@
               "404": {
                 "description": "Not found"
               }
-            }        
+            }          
           }
         },
-
-        "/products": {
-
-            "get": {
-              "tags": ["products"],
-              "parameters": [
-                {
-                  "in": "query",
-                  "name": "category",
-                  "schema": {
-                    "type": "integer"
-                  }
-                },
-                {
-                  "in": "query",
-                  "name": "sort",
-                  "schema": {
-                    "type": "string",
-                    "enum": [
-                      "date",
-                      "price",
-                      "rating"
-                    ]
-                  }
-                },
-                {
-                  "in": "query",
-                  "name": "page",
-                  "schema": {
-                    "type": "integer"
-                  }
-                }
-              ],
-
-                "responses": {
-                  "200": {
-                    "description": "OK",
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "type": "array",
-                          "items": {
-                            "$ref": "#/components/schemas/Product"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-            "post": {
-                "tags":["products"],
-                "requestBody": {
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "$ref": "#/components/schemas/Product"
-                        }
-                      }
-                    },
-                    "required": true
-                  }, 
-                "responses": {
-                    "200": {
-                      "description": "OK",
-                      "content": {
-                        "application/json": {
-                          "schema": {
-                            "$ref": "#/components/schemas/Product"
-                          }
-                        }
-                      }
-                    },
-                    "400": {
-                      "description": "Invalid input"
-                    }
-                  }
+        "/reviews/{review_id}": {
+          "parameters": [
+            {
+              "in": "path",
+              "name": "review_id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
             }
-          },
-        
-          "/products/{product_id}": {
-            "parameters": [
-                {
-                  "in": "path",
-                  "name": "product_id",
-                  "required": true,
-                  "schema": {
-                    "type": "integer"
-                  }
-                }
-              ],
-            "get": {
-                "tags": ["products"],
-                "responses": {
-                    "200": {
-                      "description": "OK",
-                      "content": {
-                        "application/json": {
-                          "schema": {
-                            "$ref": "#/components/schemas/Product"
-                          }
-                        }
-                      }
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }          
-            },
-            "put": {
-                "tags": ["products"],
-                "requestBody": {
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "$ref": "#/components/schemas/Product"
-                        }
-                      }
-                    },
-                    "required": true
-                  },
-                  "responses": {
-                    "204": {
-                      "description": "Updated successfully"
-                    },
-                    "400": {
-                      "description": "Invalid input"
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }        
-            },
-            "patch": {
-              "tags": ["products"],
-              "requestBody": {
+          ],
+          "get": {
+            "tags": ["reviews"],
+            "responses": {
+              "200": {
+                "description": "OK",
                 "content": {
                   "application/json": {
                     "schema": {
-                      "properties": {
-                        "quantity": {
-                          "type": "integer",
-                          "example": 2
-                        }
-                      }
+                      "$ref": "#/components/schemas/Review"
                     }
                   }
-                },
-                "required": true
+                }
               },
-              "responses": {
-                "204": {
-                  "description": "Updated successfully"
-                },
-                "400": {
-                  "description": "Invalid input"
-                },
-                "404": {
-                  "description": "Not found"
-                }
-              }        
-            },
-            "delete": {
-              "tags": ["products"]
-        
-            }
+              "404": {
+                "description": "Not found"
+              }
+            }          
           },
-          
-          "/products/{product_id}/reviews": {
-
-            "parameters": [
-                {
-                  "in": "path",
-                  "name": "product_id",
-                  "required": true,
+          "put": {
+            "tags": ["reviews"],
+            "requestBody": {
+              "content": {
+                "application/json": {
                   "schema": {
-                    "type": "integer"
-                  }
-                },
-                {
-                  "in": "query",
-                  "name": "page",
-                  "schema": {
-                    "type": "integer"
+                    "$ref": "#/components/schemas/Review"
                   }
                 }
-              ],  
-
-            "get": {
-              "tags": ["products", "reviews"],
-                "parameters": [
-                    {
-                      "in": "query",
-                      "name": "sort",
-                      "schema": {
-                        "type": "string",
-                        "enum": [
-                          "date",
-                          "votes",
-                          "rating"
-                        ]
-                      }
-                    }
-                  ],
-                  "responses": {
-                    "200": {
-                      "description": "OK",
-                      "content": {
-                        "application/json": {
-                          "schema": {
-                            "type": "array",
-                            "items": {
-                              "$ref": "#/components/schemas/Review"
-                            }
-                          }
-                        }
-                      }
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }    
+              },
+              "required": true
             },
-            "post": {
-              "tags": ["products", "reviews"],
-                "requestBody": {
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "$ref": "#/components/schemas/Review"
-                        }
-                      }
-                    },
-                    "required": true
-                  },
-                  "responses": {
-                    "200": {
-                      "description": "OK",
-                      "content": {
-                        "application/json": {
-                          "schema": {
-                            "$ref": "#/components/schemas/Review"
-                          }
-                        }
-                      }
-                    },
-                    "400": {
-                      "description": "Invalid input"
-                    }
-                  }
-            }
+            "responses": {
+              "204": {
+                "description": "Updated successfully"
+              },
+              "400": {
+                "description": "Invalid input"
+              },
+              "404": {
+                "description": "Not found"
+              }
+            }          
           },
-          "/products/{product_id}/reviews/{review_id}": {
-
-            "parameters": [
-                {
-                  "in": "path",
-                  "name": "product_id",
-                  "required": true,
+          "patch": {
+            "tags": ["reviews"],
+            "requestBody": {
+              "content": {
+                "application/json": {
                   "schema": {
-                    "type": "integer"
-                  }
-                },
-                {
-                  "in": "path",
-                  "name": "review_id",
-                  "required": true,
-                  "schema": {
-                    "type": "integer"
+                    "properties": {
+                      "helpful_votes": {
+                        "type": "integer",
+                        "example": 1
+                      }
+                    }
                   }
                 }
-              ],            
-
-            "get": {
-                "responses": {
-                    "200": {
-                      "description": "OK",
-                      "content": {
-                        "application/json": {
-                          "schema": {
-                            "$ref": "#/components/schemas/Review"
-                          }
-                        }
-                      }
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }          
+              },
+              "required": true
             },
-            "put": {
-                "requestBody": {
-                    "content": {
-                      "application/json": {
-                        "schema": {
-                          "$ref": "#/components/schemas/Review"
-                        }
-                      }
-                    },
-                    "required": true
-                  },
-                  "responses": {
-                    "204": {
-                      "description": "Updated successfully"
-                    },
-                    "400": {
-                      "description": "Invalid input"
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }          
+            "responses": {
+              "204": {
+                "description": "Updated successfully"
+              },
+              "400": {
+                "description": "Invalid input"
+              },
+              "404": {
+                "description": "Not found"
+              }
+            }          
+          },
+          "delete": {
+            "tags": ["reviews"],
+            "responses": {
+              "204": {
+                "description": "Deleted successfully"
+              },
+              "404": {
+                "description": "Not found"
+              }
+            }          
+          }
+        }
+  },
+    "components": {
+      "schemas": {
+        "Category": {
+          "properties": {
+            "id": {
+              "type": "integer",
+              "example": 1,
+              "readOnly": true
             },
-            "delete": {
-                "responses": {
-                    "204": {
-                      "description": "Deleted successfully"
-                    },
-                    "404": {
-                      "description": "Not found"
-                    }
-                  }          
+            "name": {
+              "type": "string",
+              "example": "Electronics"
+            },
+            "icon": {
+              "type": "string",
+              "example": "💻"
             }
           }
-                   
-    }, 
-    "components": {
-        "schemas": {
-            "Category": {
-              "properties": {
-                "id": {
-                  "type": "integer",
-                  "example": 1,
-                  "readOnly": true
-                },
-                "name": {
-                  "type": "string",
-                  "example": "Electronics"
-                },
-                "icon": {
-                  "type": "string",
-                  "example": "💻"
-                }
+        },
+          "Product": {
+            "properties": {
+              "id": {
+                "type": "integer",
+                "example": 1,
+                "readOnly": true
+              },
+              "name": {
+                "type": "string",
+                "example": "Laptop"
+              },
+              "description": {
+                "type": "string",
+                "example": "Surf the web and code all on the same machine!"
+              },
+              "price": {
+                "type": "number",
+                "example": 399.99
+              },
+              "quantity": {
+                "type": "integer",
+                "example": 50
+              },
+              "rating": {
+                "type": "number",
+                "example": 4.5,
+                "readOnly": true
+              },
+              "product_date": {
+                "type": "string",
+                "example": "2020-01-01",
+                "readOnly": true
+              },
+              "category_id": {
+                "type": "integer",
+                "example": 1
               }
-            },
-            "Product": {
+            }
+          },
+
+          "Review": {
               "properties": {
                 "id": {
                   "type": "integer",
                   "example": 1,
                   "readOnly": true
                 },
-                "name": {
+                "title": {
                   "type": "string",
-                  "example": "Laptop"
+                  "example": "This product is the best!"
                 },
-                "description": {
+                "review_text": {
                   "type": "string",
-                  "example": "Surf the web and code all on the same machine!"
-                },
-                "price": {
-                  "type": "number",
-                  "example": 399.99
-                },
-                "quantity": {
-                  "type": "integer",
-                  "example": 50
+                  "example": "I really like how it does the thing it's supposed to do."
                 },
                 "rating": {
-                  "type": "number",
-                  "example": 4.5,
-                  "readOnly": true
+                  "type": "integer",
+                  "example": 5
                 },
-                "product_date": {
+                "review_date": {
                   "type": "string",
                   "example": "2020-01-01",
                   "readOnly": true
                 },
-                "category_id": {
+                "helpful_votes": {
                   "type": "integer",
-                  "example": 1
+                  "example": 30,
+                  "readOnly": true
+                },
+                "product_id": {
+                  "type": "integer",
+                  "example": 1,
+                  "readOnly": true
                 }
               }
-            },
-            "Review": {
-                "properties": {
-                  "id": {
-                    "type": "integer",
-                    "example": 1,
-                    "readOnly": true
-                  },
-                  "title": {
-                    "type": "string",
-                    "example": "This product is the best!"
-                  },
-                  "review_text": {
-                    "type": "string",
-                    "example": "I really like how it does the thing it's supposed to do."
-                  },
-                  "rating": {
-                    "type": "integer",
-                    "example": 5
-                  },
-                  "review_date": {
-                    "type": "string",
-                    "example": "2020-01-01",
-                    "readOnly": true
-                  },
-                  "helpful_votes": {
-                    "type": "integer",
-                    "example": 30,
-                    "readOnly": true
-                  },
-                  "product_id": {
-                    "type": "integer",
-                    "example": 1,
-                    "readOnly": true
-                  }
-                }
-              }
-               
-          }
+          }  
+
+
+
+
+
+      }
     }
-  }
+
+  
+  
+}
